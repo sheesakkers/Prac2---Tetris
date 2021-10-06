@@ -60,7 +60,7 @@ class GameWorld
     {
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
-        spriteBatch.DrawString(font, "Hello!", Vector2.Zero, Color.Blue);
+        spriteBatch.DrawString(font, "Score", new Vector2(grid.Width*10, grid.Height/2), Color.Blue);
         spriteBatch.End();
     }
 

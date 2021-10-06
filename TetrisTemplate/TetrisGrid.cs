@@ -36,6 +36,13 @@ class TetrisGrid
     /// <param name="spriteBatch">The SpriteBatch used for drawing sprites and text.</param>
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
+        for(int i = 0; i < Height; i++)
+        {
+            for (int j = 0; j < Width; j++)
+            {
+                spriteBatch.Draw(emptyCell, new Vector2(j*emptyCell.Width, i*emptyCell.Height), Color.White);
+            }
+        }
     }
 
     /// <summary>
