@@ -38,6 +38,11 @@ class GameWorld
     /// </summary>
     TetrisGrid grid;
 
+    /// <summary>
+    /// Blocks.
+    /// </summary>
+    TetrisBlock blocks;
+
     public GameWorld()
     {
         random = new Random();
@@ -46,6 +51,7 @@ class GameWorld
         font = TetrisGame.ContentManager.Load<SpriteFont>("SpelFont");
 
         grid = new TetrisGrid();
+        blocks = new TetrisBlock();
     }
 
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
@@ -60,6 +66,7 @@ class GameWorld
     {
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
+        blocks.Draw(gameTime, spriteBatch);
         spriteBatch.DrawString(font, "Score", new Vector2(grid.Width*10, grid.Height/2), Color.Blue);
         spriteBatch.End();
     }
