@@ -1,10 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Base class of the blocks
@@ -16,6 +12,7 @@ class TetrisBlock
     static Random random;
     Texture2D tetromino;
     protected Color color;
+    Point position;
 
     /// <summary>
     /// Constructor
@@ -26,6 +23,7 @@ class TetrisBlock
         random = new Random();
         tetromino = TetrisGame.ContentManager.Load<Texture2D>("block");
         color = new Color();
+        position = new Point(Vector2.Zero);
     }
 
     /// <summary>
@@ -78,8 +76,9 @@ class TetrisBlock
     }
     public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
-        random.Next(7);
-        spriteBatch.Draw(tetromino, Vector2.Zero, color);
+        spriteBatch.Draw(tetromino, position, Color.Aqua);
+        //random.Next(7);
+        //spriteBatch.Draw(blocks, Vector2.Zero, color);
     }
 }
 /// <summary>
@@ -87,7 +86,6 @@ class TetrisBlock
 /// </summary>
 class IShaped : TetrisBlock
 {
-    color = Color.
     public IShaped()
     {
         for (int x = 0; x < 4; x++)
@@ -100,13 +98,8 @@ class IShaped : TetrisBlock
                     blocks[x, y] = false;
             }
         }
+        color = Color.Aqua;
     }
-
-    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        spriteBatch()
-    }
-
 }
 /// <summary>
 /// Characteristics of the O-shape
