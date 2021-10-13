@@ -13,7 +13,7 @@ class TetrisGrid
     Vector2 position;
 
     /// Indicates which grid positions are occupied by a block.
-    Color[,] gridArr = new Color[10, 20];
+    Color[,] gridArr;
 
     /// The number of grid elements in the x-direction.
     public int Width { get { return 10; } }
@@ -30,6 +30,7 @@ class TetrisGrid
     {
         emptyCell = TetrisGame.ContentManager.Load<Texture2D>("block");
         position = Vector2.Zero;
+        gridArr = new Color[10, 20];
         Clear();
     }
 

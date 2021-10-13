@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 
 /// <summary>
@@ -7,41 +8,41 @@ using System;
 /// </summary>
 class TetrisBlock
 {
-    // Every block can be defined by a 2D array
+    TetrisGrid grid;
     protected bool[,] blocks;
-    static Random random;
-    Texture2D tetromino;
+    protected Texture2D tetromino;
     protected Color color;
-    Point position;
+    protected Point position;
+    protected int randomBlock;
 
     /// <summary>
     /// Constructor
     /// </summary>
     public TetrisBlock()
     {
+        grid = new TetrisGrid();
         blocks = new bool[4, 4];
-        random = new Random();
         tetromino = TetrisGame.ContentManager.Load<Texture2D>("block");
         color = new Color();
-        position = new Point(Vector2.Zero);
+        position = new Point((grid.Width/2)*tetromino.Width, 0);
     }
 
     /// <summary>
-    /// If A is pressed, the tetris-block will rotate 90 degrees clockwise.
+    /// If D is pressed, the tetris-block will rotate 90 degrees clockwise.
     /// </summary>
-    public void ClockWise()
+    private void ClockWise()
     {
         bool[] rotate = new bool[16];
         int counter = 0;
-        for (int x = 0; x < 4; x++)
+        for (int x = 0; x <= 3; x++)
         {
-            for (int y = 0; y < 4; y++)
+            for (int y = 0; y <= 3; y++)
             {
                 rotate[counter] = blocks[x, y];
                 counter++;
             }
         }
-        for (int y = 0; y < 4; y++)
+        for (int y = 0; y <= 3; y++)
         {
             for (int x = 3; x >= 0; x--)
             {
@@ -51,15 +52,15 @@ class TetrisBlock
         }
     }
     /// <summary>
-    /// If D is pressed, the tetris-block will rotate 90 degrees counterclockwise.
+    /// If A is pressed, the tetris-block will rotate 90 degrees counterclockwise.
     /// </summary>
-    public void CounterClockWise()
+    private void CounterClockWise()
     {
         bool[] rotate = new bool[16];
         int counter = 0;
-        for (int x = 0; x < 4; x++)
+        for (int x = 0; x <= 3; x++)
         {
-            for (int y = 0; y < 4; y++)
+            for (int y = 0; y <= 3; y++)
             {
                 rotate[counter] = blocks[x, y];
                 counter++;
@@ -67,18 +68,62 @@ class TetrisBlock
         }
         for (int y = 3; y >= 0; y--)
         {
-            for (int x = 0; x < 4; x++)
+            for (int x = 0; x <= 3; x++)
             {
                 blocks[x, y] = rotate[counter];
                 counter--;
             }
         }
     }
-    public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    /// <summary>
+    /// Checks if the block is allowed to move to desired position
+    /// </summary>
+    /// <returns></returns>
+    public bool AllowedPosition()
     {
-        spriteBatch.Draw(tetromino, position, Color.Aqua);
-        //random.Next(7);
-        //spriteBatch.Draw(blocks, Vector2.Zero, color);
+        if (position.X > 0 || position.X < (grid.Width - 1) * tetromino.Width)
+            return true;
+        return false;
+    }
+
+    public void Update(GameTime gameTime, InputHelper inputHelper)
+    {
+        if (inputHelper.KeyPressed(Keys.Left))
+        {
+            if (AllowedPosition())
+                position.X -= tetromino.Width;
+        }
+        else if (inputHelper.KeyPressed(Keys.Right))
+        {
+            if (AllowedPosition())
+                position.X += tetromino.Width;
+        }
+        else if (inputHelper.KeyPressed(Keys.D))
+        {
+            ClockWise();
+            if (!AllowedPosition())
+                CounterClockWise();
+        }
+        else if (inputHelper.KeyPressed(Keys.A))
+        {
+            CounterClockWise();
+            if (!AllowedPosition())
+                ClockWise();
+        }
+
+        randomBlock = GameWorld.Random.Next(7);
+    }
+
+    public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        for (int i = 0; i < blocks.GetLength(0); i++)
+        {
+            for (int j = 0; j < blocks.GetLength(1); j++)
+            {
+                if (blocks[i, j] == true)
+                    spriteBatch.Draw(tetromino, new Vector2(position.X + (tetromino.Width * i), position.Y + (tetromino.Height * j)), color);
+            }
+        }
     }
 }
 /// <summary>
@@ -88,6 +133,7 @@ class IShaped : TetrisBlock
 {
     public IShaped()
     {
+        color = Color.Aqua;
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)
@@ -98,8 +144,9 @@ class IShaped : TetrisBlock
                     blocks[x, y] = false;
             }
         }
-        color = Color.Aqua;
     }
+
+    
 }
 /// <summary>
 /// Characteristics of the O-shape
@@ -108,6 +155,7 @@ class OShaped : TetrisBlock
 {
     public OShaped()
     {
+        color = Color.Yellow;
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)
@@ -127,6 +175,7 @@ class TShaped : TetrisBlock
 {
     public TShaped()
     {
+        color = Color.Purple;
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)
@@ -146,6 +195,7 @@ class SShaped : TetrisBlock
 {
     public SShaped()
     {
+        color = Color.Green;
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)
@@ -165,6 +215,7 @@ class LShaped : TetrisBlock
 {
     public LShaped()
     {
+        color = Color.Orange;
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)
@@ -184,6 +235,7 @@ class ZShaped : TetrisBlock
 {
     public ZShaped()
     {
+        color = Color.Red;
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)
@@ -203,6 +255,7 @@ class JShaped : TetrisBlock
 {
     public JShaped()
     {
+        color = Color.DarkBlue;
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)

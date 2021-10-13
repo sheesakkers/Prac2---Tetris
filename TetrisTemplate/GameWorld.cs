@@ -58,8 +58,9 @@ class GameWorld
     {
     }
 
-    public void Update(GameTime gameTime)
+    public void Update(GameTime gameTime, InputHelper inputHelper)
     {
+        blocks.Update(gameTime, inputHelper);
     }
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -67,7 +68,9 @@ class GameWorld
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
         blocks.Draw(gameTime, spriteBatch);
-        spriteBatch.DrawString(font, "Score", new Vector2(grid.Width*10, grid.Height/2), Color.Blue);
+        spriteBatch.DrawString(font, "Level: ", new Vector2(350, grid.Height/2), Color.Blue);
+        spriteBatch.DrawString(font, "Score: ", new Vector2(350, 1.5f * grid.Height), Color.Blue);
+        spriteBatch.DrawString(font, "Next block: ", new Vector2(350, 2.5f * grid.Height), Color.Blue);
         spriteBatch.End();
     }
 
