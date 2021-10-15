@@ -42,6 +42,13 @@ class GameWorld
     /// Blocks.
     /// </summary>
     TetrisBlock blocks;
+    IShaped iShape;
+    OShaped oShape;
+    TShaped tShape;
+    SShaped sShape;
+    LShaped lShape;
+    ZShaped zShape;
+    JShaped jShape;
 
     public GameWorld()
     {
@@ -52,6 +59,13 @@ class GameWorld
 
         grid = new TetrisGrid();
         blocks = new TetrisBlock();
+        iShape = new IShaped();
+        oShape = new OShaped();
+        tShape = new TShaped();
+        sShape = new SShaped();
+        lShape = new LShaped();
+        zShape = new ZShaped();
+        jShape = new JShaped();
     }
 
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
@@ -61,6 +75,13 @@ class GameWorld
     public void Update(GameTime gameTime, InputHelper inputHelper)
     {
         blocks.Update(gameTime, inputHelper);
+        iShape.Update(gameTime, inputHelper);
+        oShape.Update(gameTime, inputHelper);
+        tShape.Update(gameTime, inputHelper);
+        sShape.Update(gameTime, inputHelper);
+        lShape.Update(gameTime, inputHelper);
+        zShape.Update(gameTime, inputHelper);
+        jShape.Update(gameTime, inputHelper);
     }
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -68,6 +89,13 @@ class GameWorld
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
         blocks.Draw(gameTime, spriteBatch);
+        iShape.Draw(gameTime, spriteBatch);
+        oShape.Draw(gameTime, spriteBatch);
+        tShape.Draw(gameTime, spriteBatch);
+        sShape.Draw(gameTime, spriteBatch);
+        lShape.Draw(gameTime, spriteBatch);
+        zShape.Draw(gameTime, spriteBatch);
+        jShape.Draw(gameTime, spriteBatch);
         spriteBatch.DrawString(font, "Level: ", new Vector2(350, grid.Height/2), Color.Blue);
         spriteBatch.DrawString(font, "Score: ", new Vector2(350, 1.5f * grid.Height), Color.Blue);
         spriteBatch.DrawString(font, "Next block: ", new Vector2(350, 2.5f * grid.Height), Color.Blue);

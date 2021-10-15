@@ -21,6 +21,12 @@ class TetrisGrid
     /// The number of grid elements in the y-direction.
     public int Height { get { return 20; } }
 
+    public Color[,] GridArray 
+    { 
+        get { return gridArr; } 
+        set { gridArr = value; }
+    }
+
 
     /// <summary>
     /// Creates a new TetrisGrid.

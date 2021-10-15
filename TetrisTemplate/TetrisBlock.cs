@@ -8,12 +8,13 @@ using System;
 /// </summary>
 class TetrisBlock
 {
-    TetrisGrid grid;
+    protected TetrisGrid grid;
     protected bool[,] blocks;
-    protected Texture2D tetromino;
+    protected Texture2D emptyCell;
     protected Color color;
     protected Point position;
-    protected int randomBlock;
+    protected int currentBlock, nextBlock;
+    
 
     /// <summary>
     /// Constructor
@@ -22,9 +23,11 @@ class TetrisBlock
     {
         grid = new TetrisGrid();
         blocks = new bool[4, 4];
-        tetromino = TetrisGame.ContentManager.Load<Texture2D>("block");
+        emptyCell = TetrisGame.ContentManager.Load<Texture2D>("block");
         color = new Color();
-        position = new Point((grid.Width/2)*tetromino.Width, 0);
+        position = new Point((grid.Width/2 - 1) * emptyCell.Width, 0);
+        nextBlock = GameWorld.Random.Next(7);
+        currentBlock = GameWorld.Random.Next(7);
     }
 
     /// <summary>
@@ -42,12 +45,12 @@ class TetrisBlock
                 counter++;
             }
         }
-        for (int y = 0; y <= 3; y++)
+        for (int y = 3; y >= 0; y--)
         {
-            for (int x = 3; x >= 0; x--)
+            for (int x = 0; x <= 3; x++)
             {
-                blocks[x, y] = rotate[counter];
                 counter--;
+                blocks[x, y] = rotate[counter];
             }
         }
     }
@@ -58,20 +61,20 @@ class TetrisBlock
     {
         bool[] rotate = new bool[16];
         int counter = 0;
-        for (int x = 0; x <= 3; x++)
+        for (int y = 0; y <= 3; y++)
         {
-            for (int y = 0; y <= 3; y++)
+            for (int x = 0; x <= 3; x++)
             {
                 rotate[counter] = blocks[x, y];
                 counter++;
             }
         }
-        for (int y = 3; y >= 0; y--)
+        for (int x = 3; x >= 0; x--)
         {
-            for (int x = 0; x <= 3; x++)
+            for (int y = 0; y <= 3; y++)
             {
-                blocks[x, y] = rotate[counter];
                 counter--;
+                blocks[x, y] = rotate[counter];
             }
         }
     }
@@ -79,24 +82,40 @@ class TetrisBlock
     /// Checks if the block is allowed to move to desired position
     /// </summary>
     /// <returns></returns>
-    public bool AllowedPosition()
-    {
-        if (position.X > 0 || position.X < (grid.Width - 1) * tetromino.Width)
+    public bool AllowedPosition(int moveX = 0, int moveY = 0) //WERKT NOG NIET
+    {        
+        if ((position.X + moveX >= 0) && (position.X + moveX <= (grid.Width - 1) * emptyCell.Width) 
+            && (position.Y + moveY <= (grid.Height - 1) * emptyCell.Height) )
+            //&& (grid.GridArray[(position.X + moveX)/emptyCell.Width, (position.Y + moveY)/emptyCell.Height] == Color.Gray))
             return true;
         return false;
+    }
+
+    public void TetronimoToGrid()
+    {
+        for (int i = 0; i < blocks.GetLength(0); i++)
+        {
+            for (int j = 0; j < blocks.GetLength(1); j++)
+            {
+                if (blocks[i, j] == true)
+                {
+                    grid.GridArray[position.X / emptyCell.Width + i, position.Y / emptyCell.Height + j] = color;
+                }
+            }
+        }
     }
 
     public void Update(GameTime gameTime, InputHelper inputHelper)
     {
         if (inputHelper.KeyPressed(Keys.Left))
         {
-            if (AllowedPosition())
-                position.X -= tetromino.Width;
+            if (AllowedPosition(-emptyCell.Width))
+                position.X -= emptyCell.Width;
         }
         else if (inputHelper.KeyPressed(Keys.Right))
         {
-            if (AllowedPosition())
-                position.X += tetromino.Width;
+            if (AllowedPosition(emptyCell.Width))
+                position.X += emptyCell.Width;
         }
         else if (inputHelper.KeyPressed(Keys.D))
         {
@@ -110,20 +129,37 @@ class TetrisBlock
             if (!AllowedPosition())
                 ClockWise();
         }
-
-        randomBlock = GameWorld.Random.Next(7);
     }
 
-    public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
         for (int i = 0; i < blocks.GetLength(0); i++)
         {
             for (int j = 0; j < blocks.GetLength(1); j++)
             {
                 if (blocks[i, j] == true)
-                    spriteBatch.Draw(tetromino, new Vector2(position.X + (tetromino.Width * i), position.Y + (tetromino.Height * j)), color);
+                    spriteBatch.Draw(emptyCell, new Vector2(position.X + (emptyCell.Width * i), position.Y + (emptyCell.Height * j)), color);
             }
         }
+    }
+    public void DrawNextBlock(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        for (int i = 0; i < blocks.GetLength(0); i++)
+        {
+            for (int j = 0; j < blocks.GetLength(1); j++)
+            {
+                if (blocks[i, j] == true)
+                    spriteBatch.Draw(emptyCell, new Vector2(350 + (emptyCell.Width * i), 4 * grid.Height + (emptyCell.Height * j)), color);
+            }
+        }
+    }
+
+    public void Reset()
+    {
+        position.X = (grid.Width / 2 - 1) * emptyCell.Width;
+        position.Y = 0;
+        currentBlock = nextBlock;
+        nextBlock = GameWorld.Random.Next(7);
     }
 }
 /// <summary>
@@ -138,7 +174,7 @@ class IShaped : TetrisBlock
         {
             for (int y = 0; y < 4; y++)
             {
-                if (y == 1)
+                if (x == 1)
                     blocks[x, y] = true;
                 else
                     blocks[x, y] = false;
@@ -146,7 +182,13 @@ class IShaped : TetrisBlock
         }
     }
 
-    
+    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        if (currentBlock == 0)
+            base.Draw(gameTime, spriteBatch);
+        if (nextBlock == 0)
+            DrawNextBlock(gameTime, spriteBatch);
+    }
 }
 /// <summary>
 /// Characteristics of the O-shape
@@ -167,6 +209,13 @@ class OShaped : TetrisBlock
             }
         }
     }
+    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        if (currentBlock == 1)
+            base.Draw(gameTime, spriteBatch);
+        if (nextBlock == 1)
+            DrawNextBlock(gameTime, spriteBatch);
+    }
 }
 /// <summary>
 /// Characteristics of the T-shape
@@ -180,12 +229,19 @@ class TShaped : TetrisBlock
         {
             for (int y = 0; y < 4; y++)
             {
-                if (x == 0 || x == 3 || y == 3 || (x == 2 && y == 0) || (x == 2 && y == 2))
+                if (y == 0 || y == 3 || x == 3 || (y == 2 && x == 0) || (y == 2 && x == 2))
                     blocks[x, y] = false;
                 else
                     blocks[x, y] = true;
             }
         }
+    }
+    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        if (currentBlock == 2)
+            base.Draw(gameTime, spriteBatch);
+        if (nextBlock == 2)
+            DrawNextBlock(gameTime, spriteBatch);
     }
 }
 /// <summary>
@@ -200,12 +256,19 @@ class SShaped : TetrisBlock
         {
             for (int y = 0; y < 4; y++)
             {
-                if (x == 0 || x == 3 || y == 3 || (x == 1 && y == 0) || (x == 2 && y == 2))
+                if (y == 0 || y == 3 || x == 3 || (y == 1 && x == 0) || (y == 2 && x == 2))
                     blocks[x, y] = false;
                 else
                     blocks[x, y] = true;
             }
         }
+    }
+    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        if (currentBlock == 3)
+            base.Draw(gameTime, spriteBatch);
+        if (nextBlock == 3)
+            DrawNextBlock(gameTime, spriteBatch);
     }
 }
 /// <summary>
@@ -220,12 +283,19 @@ class LShaped : TetrisBlock
         {
             for (int y = 0; y < 4; y++)
             {
-                if (x == 3 || y == 0 || y == 3 || (x == 0 && y == 2) || (x == 1 && y == 2))
+                if (y == 3 || x == 0 || x == 3 || (y == 0 && x == 2) || (y == 1 && x == 2))
                     blocks[x, y] = false;
                 else
                     blocks[x, y] = true;
             }
         }
+    }
+    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        if (currentBlock == 4)
+            base.Draw(gameTime, spriteBatch);
+        if (nextBlock == 4)
+            DrawNextBlock(gameTime, spriteBatch);
     }
 }
 /// <summary>
@@ -240,12 +310,19 @@ class ZShaped : TetrisBlock
         {
             for (int y = 0; y < 4; y++)
             {
-                if (x == 0 || x == 3 || y == 3 || (x == 2 && y == 0) || (x == 1 && y == 2))
+                if (y == 0 || y == 3 || x == 3 || (y == 2 && x == 0) || (y == 1 && x == 2))
                     blocks[x, y] = false;
                 else
                     blocks[x, y] = true;
             }
         }
+    }
+    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        if (currentBlock == 5)
+            base.Draw(gameTime, spriteBatch);
+        if (nextBlock == 5)
+            DrawNextBlock(gameTime, spriteBatch);
     }
 }
 /// <summary>
@@ -260,12 +337,19 @@ class JShaped : TetrisBlock
         {
             for (int y = 0; y < 4; y++)
             {
-                if (x == 3 || y == 2 || y == 3 || (x == 1 && y == 0) || (x == 2 && y == 0))
+                if (y == 3 || x == 0 || x == 3 || (y == 1 && x == 1) || (y == 2 && x == 1))
                     blocks[x, y] = false;
                 else
                     blocks[x, y] = true;
             }
         }
+    }
+    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        if (currentBlock == 6)
+            base.Draw(gameTime, spriteBatch);
+        if (nextBlock == 6)
+            DrawNextBlock(gameTime, spriteBatch);
     }
 }
 
