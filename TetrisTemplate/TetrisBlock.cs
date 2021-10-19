@@ -32,7 +32,7 @@ class TetrisBlock
         emptyCell = TetrisGame.ContentManager.Load<Texture2D>("block");
         game = gameWorld;
         color = new Color();
-        position = new Point((grid.Width/2 - 1) * emptyCell.Width, 0);
+        position = new Point((grid.Width/2 - 1) * emptyCell.Width, -emptyCell.Height);
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ class TetrisBlock
     /// Checks if the block is allowed to move to desired position
     /// </summary>
     /// <returns></returns>
-    public bool AllowedPosition() //WERKT NOG NIET
+    public bool AllowedPosition()
     {
         for (int x = 0; x < blocks.GetLength(0); x++)
         {
@@ -95,8 +95,9 @@ class TetrisBlock
             {
                 if (blocks[x, y])
                 {
-                    if ((position.X + x * emptyCell.Width < 0) || (position.X + emptyCell.Width + x * emptyCell.Width > grid.Width * emptyCell.Width)
-                        || (position.Y + emptyCell.Height + x * emptyCell.Height > grid.Height * emptyCell.Height))
+                    if ((position.X + x * emptyCell.Width < 0) || (position.Y + y * emptyCell.Height < 0)
+                        || (position.X + emptyCell.Width + x * emptyCell.Width > grid.Width * emptyCell.Width)
+                        || (position.Y + emptyCell.Height + y * emptyCell.Height > grid.Height * emptyCell.Height))
                         //|| (grid.GridArray[position.X / emptyCell.Width + x, position.Y / emptyCell.Height + y] != Color.Gray))
                         return false;
                 }
@@ -136,7 +137,9 @@ class TetrisBlock
 
     public void Update(GameTime gameTime, InputHelper inputHelper)
     {
-        if (inputHelper.KeyPressed(Keys.Left))
+        if (!AllowedPosition())
+            position.Y += emptyCell.Height;
+        else if (inputHelper.KeyPressed(Keys.Left))
         {
             position.X -= emptyCell.Width;
             if (!AllowedPosition())
@@ -162,11 +165,12 @@ class TetrisBlock
         }
         else if (inputHelper.KeyPressed(Keys.Space))
         {
-            position.Y = (grid.Height - blocks.GetLength(1)) * emptyCell.Height;
+            position.Y = (grid.Height - blocks.GetLength(1) + 1) * emptyCell.Height;
             while (!AllowedPosition())
                 position.Y -= emptyCell.Height;
             game.BlockDown();
         }
+        inputHelper.Update(gameTime);
     }
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Point pos)
@@ -183,10 +187,10 @@ class TetrisBlock
 
     public void Reset()
     {
-        //TetronimoToGrid();
+        TetronimoToGrid();
         //FullRow();
         position.X = (grid.Width / 2 - 1) * emptyCell.Width;
-        position.Y = 0;
+        position.Y = -emptyCell.Height;
     }
 }
 /// <summary>

@@ -41,8 +41,8 @@ class GameWorld
     /// <summary>
     /// Blocks.
     /// </summary>
-    TetrisBlock blocks;
-    TetrisBlock nextBlocks;
+    TetrisBlock currentBlock;
+    TetrisBlock nextBlock;
     IShaped iShape;
     OShaped oShape;
     TShaped tShape;
@@ -51,7 +51,7 @@ class GameWorld
     ZShaped zShape;
     JShaped jShape;
 
-    int level = 1, score = 0;
+    int level = 1, score = 0, speed;
 
     public int Level
     {
@@ -72,10 +72,10 @@ class GameWorld
         font = TetrisGame.ContentManager.Load<SpriteFont>("SpelFont");
 
         grid = new TetrisGrid();
-        blocks = new TetrisBlock(this);
-        nextBlocks = new TetrisBlock(this);
-        blocks = RandomBlock();
-        nextBlocks = RandomBlock();
+        currentBlock = new TetrisBlock(this);
+        nextBlock = new TetrisBlock(this);
+        currentBlock = RandomBlock();
+        nextBlock = RandomBlock();
     }
 
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
@@ -84,16 +84,16 @@ class GameWorld
 
     public void Update(GameTime gameTime, InputHelper inputHelper)
     {
-        blocks.Update(gameTime, inputHelper);
-        nextBlocks.Update(gameTime, inputHelper);
+        currentBlock.Update(gameTime, inputHelper);
+        nextBlock.Update(gameTime, inputHelper);
     }
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
-        blocks.Draw(gameTime, spriteBatch, blocks.Position);
-        nextBlocks.Draw(gameTime, spriteBatch, new Point(315, 4 * grid.Height));
+        currentBlock.Draw(gameTime, spriteBatch, currentBlock.Position);
+        nextBlock.Draw(gameTime, spriteBatch, new Point(315, 4 * grid.Height));
         spriteBatch.DrawString(font, "Level: " + level, new Vector2(315, grid.Height/2), Color.Blue);
         spriteBatch.DrawString(font, "Score: " + score, new Vector2(315, 1.5f * grid.Height), Color.Blue);
         spriteBatch.DrawString(font, "Next block: ", new Vector2(315, 2.5f * grid.Height), Color.Blue);
@@ -102,17 +102,17 @@ class GameWorld
 
     public void BlockDown()
     {
-        blocks.Reset();
-        blocks = nextBlocks;
-        nextBlocks = RandomBlock();
+        currentBlock = nextBlock;
+        nextBlock = RandomBlock();
+        currentBlock.Reset();
     }
 
     public void Reset()
     {
         level = 1;
         score = 0;
-        blocks = RandomBlock();
-        nextBlocks = RandomBlock();
+        currentBlock = RandomBlock();
+        nextBlock = RandomBlock();
     }
 
     public TetrisBlock RandomBlock()
