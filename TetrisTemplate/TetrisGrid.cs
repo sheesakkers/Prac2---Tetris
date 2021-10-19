@@ -37,6 +37,11 @@ class TetrisGrid
         emptyCell = TetrisGame.ContentManager.Load<Texture2D>("block");
         position = Vector2.Zero;
         gridArr = new Color[10, 20];
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+                gridArr[x, y] = Color.Gray;
+        }
         Clear();
     }
 
@@ -50,10 +55,7 @@ class TetrisGrid
         for(int y = 0; y < Height; y++)
         {
             for (int x = 0; x < Width; x++)
-            {
-                gridArr[x, y] = Color.Gray;
-                spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), gridArr[x, y]);
-            }
+                spriteBatch.Draw(emptyCell, new Vector2(x*emptyCell.Width, y*emptyCell.Height), gridArr[x, y]);
         }
     }
 
