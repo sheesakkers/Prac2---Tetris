@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 
 /// <summary>
@@ -72,8 +73,8 @@ class GameWorld
         font = TetrisGame.ContentManager.Load<SpriteFont>("SpelFont");
 
         grid = new TetrisGrid();
-        currentBlock = new TetrisBlock(this);
-        nextBlock = new TetrisBlock(this);
+        currentBlock = new TetrisBlock(this, grid);
+        nextBlock = new TetrisBlock(this, grid);
         currentBlock = RandomBlock();
         nextBlock = RandomBlock();
     }
@@ -84,19 +85,39 @@ class GameWorld
 
     public void Update(GameTime gameTime, InputHelper inputHelper)
     {
-        currentBlock.Update(gameTime, inputHelper);
-        nextBlock.Update(gameTime, inputHelper);
+        if (gameState == GameState.Playing)
+        {
+            currentBlock.Update(gameTime, inputHelper);
+            nextBlock.Update(gameTime, inputHelper);
+        }
+        else
+        {
+            if (inputHelper.KeyPressed(Keys.Enter))
+                gameState = GameState.Playing;
+        }   
     }
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
         spriteBatch.Begin();
-        grid.Draw(gameTime, spriteBatch);
-        currentBlock.Draw(gameTime, spriteBatch, currentBlock.Position);
-        nextBlock.Draw(gameTime, spriteBatch, new Point(315, 4 * grid.Height));
-        spriteBatch.DrawString(font, "Level: " + level, new Vector2(315, grid.Height/2), Color.Blue);
-        spriteBatch.DrawString(font, "Score: " + score, new Vector2(315, 1.5f * grid.Height), Color.Blue);
-        spriteBatch.DrawString(font, "Next block: ", new Vector2(315, 2.5f * grid.Height), Color.Blue);
+        if (gameState == GameState.Playing)
+        {
+            grid.Draw(gameTime, spriteBatch);
+            currentBlock.Draw(gameTime, spriteBatch, currentBlock.Position);
+            nextBlock.Draw(gameTime, spriteBatch, new Point(315, 4 * grid.Height));
+            spriteBatch.DrawString(font, "Level: " + level, new Vector2(315, grid.Height / 2), Color.Blue);
+            spriteBatch.DrawString(font, "Score: " + score, new Vector2(315, 1.5f * grid.Height), Color.Blue);
+            spriteBatch.DrawString(font, "Next block: ", new Vector2(315, 2.5f * grid.Height), Color.Blue);
+        }
+        else
+        {
+            grid.Draw(gameTime, spriteBatch);
+            spriteBatch.DrawString(font, "Level: " + level, new Vector2(315, grid.Height / 2), Color.Blue);
+            spriteBatch.DrawString(font, "Score: " + score, new Vector2(315, 1.5f * grid.Height), Color.Blue);
+            spriteBatch.DrawString(font, "Next block: ", new Vector2(315, 2.5f * grid.Height), Color.Blue);
+            spriteBatch.DrawString(font, "GAME OVER !!", new Vector2(315, 10f * grid.Height), Color.Red);
+            spriteBatch.DrawString(font, "Druk op <ENTER> om opnieuw te spelen.", new Vector2(315, 11f * grid.Height), Color.Blue);
+        }        
         spriteBatch.End();
     }
 
@@ -104,11 +125,11 @@ class GameWorld
     {
         currentBlock = nextBlock;
         nextBlock = RandomBlock();
-        currentBlock.Reset();
     }
 
     public void Reset()
     {
+        grid.Clear();
         level = 1;
         score = 0;
         currentBlock = RandomBlock();
@@ -119,17 +140,17 @@ class GameWorld
     {
         int random = Random.Next(0, 7);
         if (random == 0)
-            return new IShaped(this);
+            return new IShaped(this, grid);
         else if (random == 1)
-            return new OShaped(this);
+            return new OShaped(this, grid);
         else if (random == 2)
-            return new TShaped(this);
+            return new TShaped(this, grid);
         else if (random == 3)
-            return new SShaped(this);
+            return new SShaped(this, grid);
         else if (random == 4)
-            return new LShaped(this);
+            return new LShaped(this, grid);
         else if (random == 5)
-            return new ZShaped(this);
-        return new JShaped(this);
+            return new ZShaped(this, grid);
+        return new JShaped(this, grid);
     }
 }
