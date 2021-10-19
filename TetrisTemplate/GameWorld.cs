@@ -64,7 +64,6 @@ class GameWorld
         set { score = value; }
     }
 
-
     public GameWorld()
     {
         random = new Random();
@@ -75,6 +74,8 @@ class GameWorld
         grid = new TetrisGrid();
         blocks = new TetrisBlock(this);
         nextBlocks = new TetrisBlock(this);
+        blocks = RandomBlock();
+        nextBlocks = RandomBlock();
     }
 
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
@@ -91,21 +92,30 @@ class GameWorld
     {
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
-        blocks.DrawBlock(gameTime, spriteBatch);
-        nextBlocks.DrawNextBlock(gameTime, spriteBatch);
+        blocks.Draw(gameTime, spriteBatch, blocks.Position);
+        nextBlocks.Draw(gameTime, spriteBatch, new Point(315, 4 * grid.Height));
         spriteBatch.DrawString(font, "Level: " + level, new Vector2(315, grid.Height/2), Color.Blue);
         spriteBatch.DrawString(font, "Score: " + score, new Vector2(315, 1.5f * grid.Height), Color.Blue);
         spriteBatch.DrawString(font, "Next block: ", new Vector2(315, 2.5f * grid.Height), Color.Blue);
         spriteBatch.End();
     }
 
+    public void BlockDown()
+    {
+        blocks.Reset();
+        blocks = nextBlocks;
+        nextBlocks = RandomBlock();
+    }
+
     public void Reset()
     {
         level = 1;
         score = 0;
+        blocks = RandomBlock();
+        nextBlocks = RandomBlock();
     }
 
-    private TetrisBlock RandomBlock()
+    public TetrisBlock RandomBlock()
     {
         int random = Random.Next(0, 7);
         if (random == 0)

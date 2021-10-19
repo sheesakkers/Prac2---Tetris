@@ -14,7 +14,12 @@ class TetrisBlock
     protected GameWorld game;
     protected Color color;
     protected Point position;
-    protected int currentBlock, nextBlock;    
+    //protected int currentBlock, nextBlock;    
+
+    public Point Position
+    {
+        get { return position; }
+    }
 
     /// <summary>
     /// Constructor
@@ -160,38 +165,26 @@ class TetrisBlock
             position.Y = (grid.Height - blocks.GetLength(1)) * emptyCell.Height;
             while (!AllowedPosition())
                 position.Y -= emptyCell.Height;
-            TetronimoToGrid();
-            Reset();
+            game.BlockDown();
         }
     }
 
-    public void DrawBlock(GameTime gameTime, SpriteBatch spriteBatch)
+    public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Point pos)
     {
         for (int x = 0; x < blocks.GetLength(0); x++)
         {
             for (int y = 0; y < blocks.GetLength(1); y++)
             {
                 if (blocks[x, y])
-                    spriteBatch.Draw(emptyCell, new Vector2(position.X + (emptyCell.Width * x), position.Y + (emptyCell.Height * y)), color);
-            }
-        }
-    }
-    public void DrawNextBlock(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        for (int x = 0; x < nextBlocks.GetLength(0); x++)
-        {
-            for (int y = 0; y < nextBlocks.GetLength(1); y++)
-            {
-                if (nextBlocks[x, y])
-                    spriteBatch.Draw(emptyCell, new Vector2(315 + (emptyCell.Width * x), 4 * grid.Height + (emptyCell.Height * y)), color);
+                    spriteBatch.Draw(emptyCell, new Vector2(pos.X + (emptyCell.Width * x), pos.Y + (emptyCell.Height * y)), color);
             }
         }
     }
 
     public void Reset()
     {
-        TetronimoToGrid();
-        FullRow();
+        //TetronimoToGrid();
+        //FullRow();
         position.X = (grid.Width / 2 - 1) * emptyCell.Width;
         position.Y = 0;
     }
@@ -229,8 +222,7 @@ class OShaped : TetrisBlock
     public OShaped(GameWorld gameWorld) : base(gameWorld)
     {
         color = Color.Yellow;
-        
-        nextBlocks = (bool[,])blocks.Clone();
+        FillArray(blocks);
     }
     public void FillArray(bool[,] array)
     {
@@ -254,6 +246,7 @@ class TShaped : TetrisBlock
     public TShaped(GameWorld gameWorld) : base(gameWorld)
     {
         color = Color.Purple;
+        FillArray(blocks);
     }
     public void FillArray(bool[,] array)
     {
@@ -277,6 +270,7 @@ class SShaped : TetrisBlock
     public SShaped(GameWorld gameWorld) : base(gameWorld)
     {
         color = Color.Green;
+        FillArray(blocks);
     }
     public void FillArray(bool[,] array)
     {
@@ -300,6 +294,7 @@ class LShaped : TetrisBlock
     public LShaped(GameWorld gameWorld) : base(gameWorld)
     {
         color = Color.Orange;
+        FillArray(blocks);
     }
     public void FillArray(bool[,] array)
     {
@@ -322,7 +317,8 @@ class ZShaped : TetrisBlock
 {
     public ZShaped(GameWorld gameWorld) : base(gameWorld)
     {
-        color = Color.Red;        
+        color = Color.Red;
+        FillArray(blocks);
     }
     public void FillArray(bool[,] array)
     {
@@ -345,7 +341,8 @@ class JShaped : TetrisBlock
 {
     public JShaped(GameWorld gameWorld) : base(gameWorld)
     {
-        color = Color.DarkBlue;        
+        color = Color.DarkBlue;
+        FillArray(blocks);
     }
     public void FillArray(bool[,] array)
     {
