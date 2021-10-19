@@ -51,8 +51,8 @@ class TetrisGrid
         {
             for (int x = 0; x < Width; x++)
             {
-                spriteBatch.Draw(emptyCell, new Vector2(x*emptyCell.Width, y*emptyCell.Height), Color.White);
                 gridArr[x, y] = Color.Gray;
+                spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), gridArr[x, y]);
             }
         }
     }

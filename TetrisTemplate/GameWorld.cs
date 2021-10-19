@@ -50,6 +50,20 @@ class GameWorld
     ZShaped zShape;
     JShaped jShape;
 
+    int level = 1, score = 0;
+
+    public int Level
+    {
+        get { return level; }
+        set { level = value; }
+    }
+    public int Score
+    {
+        get { return score; }
+        set { score = value; }
+    }
+
+
     public GameWorld()
     {
         random = new Random();
@@ -88,7 +102,6 @@ class GameWorld
     {
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
-        blocks.Draw(gameTime, spriteBatch);
         iShape.Draw(gameTime, spriteBatch);
         oShape.Draw(gameTime, spriteBatch);
         tShape.Draw(gameTime, spriteBatch);
@@ -96,14 +109,16 @@ class GameWorld
         lShape.Draw(gameTime, spriteBatch);
         zShape.Draw(gameTime, spriteBatch);
         jShape.Draw(gameTime, spriteBatch);
-        spriteBatch.DrawString(font, "Level: ", new Vector2(350, grid.Height/2), Color.Blue);
-        spriteBatch.DrawString(font, "Score: ", new Vector2(350, 1.5f * grid.Height), Color.Blue);
-        spriteBatch.DrawString(font, "Next block: ", new Vector2(350, 2.5f * grid.Height), Color.Blue);
+        spriteBatch.DrawString(font, "Level: " + level, new Vector2(315, grid.Height/2), Color.Blue);
+        spriteBatch.DrawString(font, "Score: " + score, new Vector2(315, 1.5f * grid.Height), Color.Blue);
+        spriteBatch.DrawString(font, "Next block: ", new Vector2(315, 2.5f * grid.Height), Color.Blue);
         spriteBatch.End();
     }
 
     public void Reset()
     {
+        level = 1;
+        score = 0;
     }
 
 }
