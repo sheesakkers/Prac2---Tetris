@@ -120,17 +120,22 @@ class TetrisBlock
     /// Checks if there are any full rows.
     /// </summary>
     public void FullRow()
-    {        
+    {
         for (int y = grid.Height - 1; y >= 0; y--)
         {
             for (int x = 0; x < grid.Width; x++)
             {
-                
-                game.Score += 10;
-                if (game.Score % 100 == 0)
-                    game.Level += 1;
+                if (grid.GridArray[x, y] == Color.Gray)
+                    break;
+                else if (x == grid.Width - 1)
+                {
+                    //Remove row
+                    game.Score += 10;
+                }
             }
-        }
+            if ((game.Score > 0) && (game.Score % 100 == 0))
+                game.Level += 1;
+        }        
     }
 
     public void Update(GameTime gameTime, InputHelper inputHelper)
@@ -187,7 +192,7 @@ class TetrisBlock
     public void Reset()
     {
         TetronimoToGrid();
-        //FullRow();
+        FullRow();
         position.X = (grid.Width / 2 - 1) * emptyCell.Width;
         position.Y = -emptyCell.Height;
         game.BlockDown();
