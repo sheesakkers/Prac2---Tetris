@@ -15,6 +15,7 @@ class TetrisBlock
     protected GameWorld game;
     protected Color color;
     protected Point position;
+    public double speed = 1;
 
     public Point Position
     {
@@ -117,55 +118,48 @@ class TetrisBlock
         }
     }
 
+    private bool IsRowFull(int y)
+    {
+        for (int x = 0; x < grid.Width; x++)
+        {
+            if (grid.GridArray[x, y] == Color.Gray)
+                return false;
+        }
+        return true;
+    }
+
     /// <summary>
     /// Checks if there are any full rows. 
     /// The score is dependent on the amount of lines that is cleared.
     /// The player can level-up by scoring higher and higher per level.
     /// </summary>
-    public void FullRow()
+    public void ClearRows()
     {
         int counter = 0;
-        Color[,] arrayCopy = new Color[grid.Width, grid.Height];
-        for (int y = grid.Height - 1; y >= 0; y--)
+        for (int y = grid.Height - 1; y > 0; y--)
         {
-            for (int x = 0; x < grid.Width; x++)
+            if (IsRowFull(y))
             {
-                if (grid.GridArray[x, y] == Color.Gray)
-                    break;
-                else if (x == grid.Width - 1)
+                for (int j = y; j > 0; j--)
                 {
-                    int shift = 1;
-                    for (int j = 0; j < grid.Height; j++)
+                    for (int i = 0; i < grid.Width; i++)
                     {
-                        for (int i = 0; i < grid.Width; i++)
-                        {
-                            if (j == 0)
-                                arrayCopy[i, 0] = Color.Gray;
-                            else if (j == y + shift)
-                            {
-                                arrayCopy[i, j] = grid.GridArray[i, j];
-                                if (x == grid.Width - 1)
-                                    shift--;
-                            }
-                            else
-                                arrayCopy[i, j] = grid.GridArray[i, j - shift];
-                        }
+                        grid.GridArray[i, j] = grid.GridArray[i, j - 1];
                     }
-                    shift++;
-                    counter++;
                 }
+                y++;
+                counter++;
             }
         }
         if (counter > 0)
-        {
             game.Score += 10 * counter;
-            grid.GridArray = arrayCopy;
-        }
-        if ((game.Score > 0) && (game.Score % (250 * 0.7 * game.Level) == 0))
+        if ((game.Score > 0) && (game.Score % (250 * game.Level) == 0))
+        {
             game.Level += 1;
+            speed++;
+        }
     }
-
-    public void Update(GameTime gameTime, InputHelper inputHelper)
+    public void Movement(InputHelper inputHelper)
     {
         if (!AllowedPosition())
             position.Y += emptyCell.Height; //DRAAIEN FIXEN
@@ -201,6 +195,25 @@ class TetrisBlock
             position.Y -= emptyCell.Height;
             Reset();
         }
+    }
+
+    public void MovingDown(GameTime gameTime)
+    {
+        if ((int)gameTime.ElapsedGameTime.TotalSeconds == 1)
+        {
+            position.Y += emptyCell.Height;
+            if (!AllowedPosition())
+            {
+                position.Y -= emptyCell.Height;
+                Reset();
+            }
+        }            
+    }
+
+    public void Update(GameTime gameTime, InputHelper inputHelper)
+    {
+        MovingDown(gameTime);
+        Movement(inputHelper);
         inputHelper.Update(gameTime);
     }
 
@@ -219,10 +232,11 @@ class TetrisBlock
     public void Reset()
     {
         TetronimoToGrid();
-        FullRow();
+        ClearRows();
         position.X = (grid.Width / 2 - 1) * emptyCell.Width;
         position.Y = -emptyCell.Height;
         game.BlockDown();
+        speed = 1;
     }
 }
 /// <summary>

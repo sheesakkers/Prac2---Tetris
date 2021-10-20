@@ -132,6 +132,7 @@ class GameWorld
         grid.Clear();
         level = 1;
         score = 0;
+        currentBlock.speed = 1;
         currentBlock = RandomBlock();
         nextBlock = RandomBlock();
     }
