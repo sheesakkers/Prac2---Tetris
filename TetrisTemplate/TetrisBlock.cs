@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// Base class of the blocks
@@ -117,10 +118,14 @@ class TetrisBlock
     }
 
     /// <summary>
-    /// Checks if there are any full rows.
+    /// Checks if there are any full rows. 
+    /// The score is dependent on the amount of lines that is cleared.
+    /// The player can level-up by scoring higher and higher per level.
     /// </summary>
     public void FullRow()
     {
+        int counter = 0;
+        Color[,] arrayCopy = new Color[grid.Width, grid.Height];
         for (int y = grid.Height - 1; y >= 0; y--)
         {
             for (int x = 0; x < grid.Width; x++)
@@ -129,13 +134,35 @@ class TetrisBlock
                     break;
                 else if (x == grid.Width - 1)
                 {
-                    //Remove row
-                    game.Score += 10;
+                    int shift = 1;
+                    for (int j = 0; j < grid.Height; j++)
+                    {
+                        for (int i = 0; i < grid.Width; i++)
+                        {
+                            if (j == 0)
+                                arrayCopy[i, 0] = Color.Gray;
+                            else if (j == y + shift)
+                            {
+                                arrayCopy[i, j] = grid.GridArray[i, j];
+                                if (x == grid.Width - 1)
+                                    shift--;
+                            }
+                            else
+                                arrayCopy[i, j] = grid.GridArray[i, j - shift];
+                        }
+                    }
+                    shift++;
+                    counter++;
                 }
             }
-            if ((game.Score > 0) && (game.Score % 100 == 0))
-                game.Level += 1;
-        }        
+        }
+        if (counter > 0)
+        {
+            game.Score += 10 * counter;
+            grid.GridArray = arrayCopy;
+        }
+        if ((game.Score > 0) && (game.Score % (250 * 0.7 * game.Level) == 0))
+            game.Level += 1;
     }
 
     public void Update(GameTime gameTime, InputHelper inputHelper)
@@ -359,7 +386,7 @@ class JShaped : TetrisBlock
         {
             for (int y = 0; y < 4; y++)
             {
-                if (y == 3 || x == 0 || x == 3 || (y == 1 && x == 1) || (y == 2 && x == 1))
+                if (y == 3 || x == 0 || x == 3 || (y == 1 && x == 2) || (y == 2 && x == 2))
                     array[x, y] = false;
                 else
                     array[x, y] = true;
