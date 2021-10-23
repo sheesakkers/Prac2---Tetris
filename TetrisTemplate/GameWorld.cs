@@ -1,18 +1,19 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
+using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 
 /// <summary>
 /// A class for representing the game world.
-/// This contains the grid, the falling block, and everything else that the player can see/do.
 /// </summary>
 class GameWorld
 {
     /// <summary>
     /// An enum for the different game states that the game can have.
     /// </summary>
-    enum GameState
+    public enum GameState
     {
         Playing,
         GameOver
@@ -25,14 +26,30 @@ class GameWorld
     static Random random;
 
     /// <summary>
+    /// The current game state.
+    /// </summary>
+    public GameState gameState;
+
+    /// <summary>
+    /// Level, score score and if the level should increase.
+    /// </summary>
+    public int level, score;
+    public bool levelUp;
+
+    /// <summary>
+    /// Sound effects and song of the game.
+    /// </summary>
+    public SoundEffect rotate;
+    public SoundEffect clearRow;
+    public SoundEffect clear4;
+    public SoundEffect levelUpSound;
+    public SoundEffect gameOver;
+    public Song mainTheme;
+
+    /// <summary>
     /// The main font of the game.
     /// </summary>
     SpriteFont font;
-
-    /// <summary>
-    /// The current game state.
-    /// </summary>
-    GameState gameState;
 
     /// <summary>
     /// The main grid of the game.
@@ -40,78 +57,88 @@ class GameWorld
     TetrisGrid grid;
 
     /// <summary>
-    /// Blocks.
+    /// Current block and the next block.
     /// </summary>
     TetrisBlock currentBlock;
     TetrisBlock nextBlock;
-    IShaped iShape;
-    OShaped oShape;
-    TShaped tShape;
-    SShaped sShape;
-    LShaped lShape;
-    ZShaped zShape;
-    JShaped jShape;
-
-    int level = 1, score = 0, speed;
-
-    public int Level
-    {
-        get { return level; }
-        set { level = value; }
-    }
-    public int Score
-    {
-        get { return score; }
-        set { score = value; }
-    }
-
+    
+    /// <summary>
+    /// Constructor.
+    /// </summary>
     public GameWorld()
     {
         random = new Random();
+
         gameState = GameState.Playing;
+
+        level = 1;
+        score = 0;
+        levelUp = false;
+
+        rotate = TetrisGame.ContentManager.Load<SoundEffect>("rotate");
+        clearRow = TetrisGame.ContentManager.Load<SoundEffect>("clear");
+        clear4 = TetrisGame.ContentManager.Load<SoundEffect>("clear4");
+        levelUpSound = TetrisGame.ContentManager.Load<SoundEffect>("success");
+        gameOver = TetrisGame.ContentManager.Load<SoundEffect>("gameover");
+        mainTheme = TetrisGame.ContentManager.Load<Song>("maintheme");
 
         font = TetrisGame.ContentManager.Load<SpriteFont>("SpelFont");
 
         grid = new TetrisGrid();
         currentBlock = new TetrisBlock(this, grid);
         nextBlock = new TetrisBlock(this, grid);
+
         currentBlock = RandomBlock();
         nextBlock = RandomBlock();
     }
 
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
     {
-    }
+        currentBlock.HandleInput(gameTime, inputHelper);
 
-    public void Update(GameTime gameTime, InputHelper inputHelper)
+        // if the game is over the player can restart by pressing <ENTER>
+        if (gameState == GameState.GameOver)
+        {
+            if (inputHelper.KeyPressed(Keys.Enter))
+            {
+                Reset();
+                gameState = GameState.Playing;
+            }
+        }
+
+        inputHelper.Update(gameTime);
+    }
+    /// <summary>
+    /// Only update if the player is playing the game.
+    /// </summary>
+    public void Update(GameTime gameTime)
     {
         if (gameState == GameState.Playing)
         {
-            currentBlock.Update(gameTime, inputHelper);
-            nextBlock.Update(gameTime, inputHelper);
+            currentBlock.Update(gameTime);
+            nextBlock.Update(gameTime);
         }
-        else
-        {
-            if (inputHelper.KeyPressed(Keys.Enter))
-                gameState = GameState.Playing;
-        }   
     }
-
-    public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    /// <summary>
+    /// Draw everything on screen.
+    /// </summary>
+    public void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin();
         if (gameState == GameState.Playing)
         {
-            grid.Draw(gameTime, spriteBatch);
-            currentBlock.Draw(gameTime, spriteBatch, currentBlock.Position);
-            nextBlock.Draw(gameTime, spriteBatch, new Point(315, 4 * grid.Height));
+            grid.Draw(spriteBatch);
+            currentBlock.Draw(spriteBatch, currentBlock.position);
+            nextBlock.Draw(spriteBatch, new Point(315, 4 * grid.Height));
             spriteBatch.DrawString(font, "Level: " + level, new Vector2(315, grid.Height / 2), Color.Blue);
             spriteBatch.DrawString(font, "Score: " + score, new Vector2(315, 1.5f * grid.Height), Color.Blue);
             spriteBatch.DrawString(font, "Next block: ", new Vector2(315, 2.5f * grid.Height), Color.Blue);
+            if (levelUp)
+                spriteBatch.DrawString(font, "Level Up!!", new Vector2(315, 11f * grid.Height), Color.LawnGreen);
         }
         else
         {
-            grid.Draw(gameTime, spriteBatch);
+            grid.Draw(spriteBatch);
             spriteBatch.DrawString(font, "Level: " + level, new Vector2(315, grid.Height / 2), Color.Blue);
             spriteBatch.DrawString(font, "Score: " + score, new Vector2(315, 1.5f * grid.Height), Color.Blue);
             spriteBatch.DrawString(font, "Next block: ", new Vector2(315, 2.5f * grid.Height), Color.Blue);
@@ -120,24 +147,37 @@ class GameWorld
         }        
         spriteBatch.End();
     }
-
+    /// <summary>
+    /// If the current tetromino is placed on the grid, a new current tetromino will become the next tetromino.
+    /// The new next tetromino will be randomly chosen.
+    /// </summary>
     public void BlockDown()
     {
         currentBlock = nextBlock;
         nextBlock = RandomBlock();
-    }
 
+        currentBlock.position.X = (grid.Width / 2 - 1) * grid.emptyCell.Width;
+        currentBlock.position.Y = 0;
+    }
+    /// <summary>
+    /// Reset the entire game.
+    /// </summary>
     public void Reset()
     {
         grid.Clear();
         level = 1;
         score = 0;
-        currentBlock.speed = 1;
+        currentBlock.waitTime = 0.3;
         currentBlock = RandomBlock();
         nextBlock = RandomBlock();
+        currentBlock.position.X = (grid.Width / 2 - 1) * grid.emptyCell.Width;
+        currentBlock.position.Y = 0;
+        levelUp = false;
     }
-
-    public TetrisBlock RandomBlock()
+    /// <summary>
+    /// Random selection of the tetrominoes.
+    /// </summary>
+    TetrisBlock RandomBlock()
     {
         int random = Random.Next(0, 7);
         if (random == 0)

@@ -1,26 +1,51 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// Base class of the blocks
 /// </summary>
 class TetrisBlock
 {
-    protected TetrisGrid grid;
-    protected bool[,] blocks;
-    protected Texture2D emptyCell;
-    protected GameWorld game;
-    protected Color color;
-    protected Point position;
-    public double speed = 1;
+    /// <summary>
+    /// Position of the top-left corner of the 4x4 array that describes the tetrominoes.
+    /// </summary>
+    public Point position;
 
-    public Point Position
-    {
-        get { return position; }
-    }
+    /// <summary>
+    /// The time to wait before the tetrominoes fall down to the next row.
+    /// </summary>
+    public double waitTime;
+
+    /// <summary>
+    /// 4x4 array that describes the tretronimos using true and false.
+    /// </summary>
+    protected bool[,] blocks;
+
+    /// <summary>
+    /// Specific colors linked to the 7 tetrominoes.
+    /// </summary>
+    protected Color color;
+
+    /// <summary>
+    /// Passed time between every time the Update method is used.
+    /// </summary>
+    double velocity;
+
+    /// <summary>
+    /// Main grid of the game.
+    /// </summary>
+    TetrisGrid grid;
+
+    /// <summary>
+    /// A single square sprite in the grid.
+    /// </summary>
+    Texture2D emptyCell;
+
+    /// <summary>
+    /// Main game.
+    /// </summary>
+    GameWorld game;
 
     /// <summary>
     /// Constructor
@@ -28,17 +53,20 @@ class TetrisBlock
     public TetrisBlock(GameWorld gameWorld, TetrisGrid tetrisGrid)
     {
         grid = tetrisGrid;
-        blocks = new bool[4, 4];
         emptyCell = TetrisGame.ContentManager.Load<Texture2D>("block");
         game = gameWorld;
+
+        position = new Point((grid.Width / 2 - 1) * emptyCell.Width, -emptyCell.Height);
+        waitTime = 0.3;
+        blocks = new bool[4, 4];
         color = new Color();
-        position = new Point((grid.Width/2 - 1) * emptyCell.Width, -emptyCell.Height);
+        velocity = 1;
     }
 
     /// <summary>
-    /// If D is pressed, the tetris-block will rotate 90 degrees clockwise.
+    /// Rotates the 4x4 array that describes the tetromino 90 degrees clockwise.
     /// </summary>
-    private void ClockWise()
+    void ClockWise()
     {
         bool[] rotate = new bool[16];
         int counter = 0;
@@ -59,10 +87,11 @@ class TetrisBlock
             }
         }
     }
+
     /// <summary>
-    /// If A is pressed, the tetris-block will rotate 90 degrees counterclockwise.
+    /// Rotates the 4x4 array that describes the tetromino 90 degrees counterclockwise.
     /// </summary>
-    private void CounterClockWise()
+    void CounterClockWise()
     {
         bool[] rotate = new bool[16];
         int counter = 0;
@@ -83,11 +112,13 @@ class TetrisBlock
             }
         }
     }
+
     /// <summary>
-    /// Checks if the block is allowed to move to desired position
+    /// Checks if the tetromino is allowed to move to desired position.
+    /// It can not go beyond the borders of the grid or overlap with another tetromino.
+    /// Returns true or false.
     /// </summary>
-    /// <returns></returns>
-    public bool AllowedPosition()
+    bool AllowedPosition()
     {
         for (int x = 0; x < blocks.GetLength(0); x++)
         {
@@ -98,7 +129,7 @@ class TetrisBlock
                     if ((position.X + x * emptyCell.Width < 0) || (position.Y + y * emptyCell.Height < 0)
                         || (position.X + emptyCell.Width + x * emptyCell.Width > grid.Width * emptyCell.Width)
                         || (position.Y + emptyCell.Height + y * emptyCell.Height > grid.Height * emptyCell.Height)
-                        || (grid.GridArray[position.X / emptyCell.Width + x, position.Y / emptyCell.Height + y] != Color.Gray))
+                        || (grid.GridArray[position.X / emptyCell.Width + x, position.Y / emptyCell.Height + y] != Color.White))
                         return false;
                 }
             }
@@ -106,7 +137,10 @@ class TetrisBlock
         return true;
     }
 
-    public void TetronimoToGrid()
+    /// <summary>
+    /// If the tetromino has reached the bottom and cannot be moved anymore, its position will be documented in the main grid.
+    /// </summary>
+    void TetrominoToGrid()
     {
         for (int x = 0; x < blocks.GetLength(0); x++)
         {
@@ -118,22 +152,27 @@ class TetrisBlock
         }
     }
 
-    private bool IsRowFull(int y)
+    /// <summary>
+    /// Checks if the current row is full.
+    /// Returns true or false.
+    /// </summary>
+    bool IsRowFull(int y)
     {
         for (int x = 0; x < grid.Width; x++)
         {
-            if (grid.GridArray[x, y] == Color.Gray)
+            if (grid.GridArray[x, y] == Color.White)
                 return false;
         }
         return true;
     }
 
     /// <summary>
-    /// Checks if there are any full rows. 
-    /// The score is dependent on the amount of lines that is cleared.
-    /// The player can level-up by scoring higher and higher per level.
+    /// Checks if there are any full rows using the IsRowFull-method. 
+    /// The amount of full rows is saved in a variable.
+    /// Every full row will increase the score with 10 points.
+    /// The player can level-up by scoring 100 points per level and the blocks will start moving down faster.
     /// </summary>
-    public void ClearRows()
+    void ClearRows()
     {
         int counter = 0;
         for (int y = grid.Height - 1; y > 0; y--)
@@ -151,19 +190,54 @@ class TetrisBlock
                 counter++;
             }
         }
+
         if (counter > 0)
-            game.Score += 10 * counter;
-        if ((game.Score > 0) && (game.Score % (250 * game.Level) == 0))
         {
-            game.Level += 1;
-            speed++;
+            game.score += 10 * counter;
+            if (game.score >= game.level * 100)
+            {
+                game.level += 1;
+                game.levelUp = true;
+                waitTime *= 3;
+                game.levelUpSound.Play();
+            }
+            else
+            {
+                if (counter == 4)
+                    game.clear4.Play();
+                else
+                    game.clearRow.Play();
+            }
         }
     }
-    public void Movement(InputHelper inputHelper)
+
+    /// <summary>
+    /// The tetromino will move automatically down.
+    /// </summary>
+    void MovingDown()
     {
-        if (!AllowedPosition())
-            position.Y += emptyCell.Height; //DRAAIEN FIXEN
-        else if (inputHelper.KeyPressed(Keys.Left))
+        if (velocity <= waitTime)
+        {
+            position.Y += emptyCell.Height;
+            if (!AllowedPosition())
+            {
+                position.Y -= emptyCell.Height;
+                Reset();
+            }
+            velocity = 1;
+        }
+    }
+
+    /// <summary>
+    /// If the left-key is pressed, the tetromino will move to the left if possible.
+    /// If the right-key is pressed, the tetromino will move to the right if possible.
+    /// If the D is pressed, the tetromino will rotate clockwise if possible.
+    /// If the A is pressed, the tetromino will rotate counterclockwise if possible.
+    /// If the space-bar is pressed, the tetromino will move down as far as possible and the position will be saved in the main grid.
+    /// </summary>
+    public void HandleInput(GameTime gameTime, InputHelper inputHelper)
+    {
+        if (inputHelper.KeyPressed(Keys.Left))
         {
             position.X -= emptyCell.Width;
             if (!AllowedPosition())
@@ -180,12 +254,16 @@ class TetrisBlock
             ClockWise();
             if (!AllowedPosition())
                 CounterClockWise();
+            else
+                game.rotate.Play();
         }
         else if (inputHelper.KeyPressed(Keys.A))
         {
             CounterClockWise();
             if (!AllowedPosition())
                 ClockWise();
+            else
+                game.rotate.Play();
         }
         else if (inputHelper.KeyPressed(Keys.Space))
         {
@@ -197,27 +275,19 @@ class TetrisBlock
         }
     }
 
-    public void MovingDown(GameTime gameTime)
+    /// <summary>
+    /// Updates the movement of the tetromino.
+    /// </summary>
+    public void Update(GameTime gameTime)
     {
-        if ((int)gameTime.ElapsedGameTime.TotalSeconds == 1)
-        {
-            position.Y += emptyCell.Height;
-            if (!AllowedPosition())
-            {
-                position.Y -= emptyCell.Height;
-                Reset();
-            }
-        }            
+        velocity -= gameTime.ElapsedGameTime.TotalSeconds;
+        MovingDown();
     }
 
-    public void Update(GameTime gameTime, InputHelper inputHelper)
-    {
-        MovingDown(gameTime);
-        Movement(inputHelper);
-        inputHelper.Update(gameTime);
-    }
-
-    public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Point pos)
+    /// <summary>
+    /// Draws the tetrominoes on screen.
+    /// </summary>
+    public void Draw(SpriteBatch spriteBatch, Point pos)
     {
         for (int x = 0; x < blocks.GetLength(0); x++)
         {
@@ -229,14 +299,24 @@ class TetrisBlock
         }
     }
 
-    public void Reset()
+    /// <summary>
+    /// Resets the entire game if the the game is over.
+    /// Otherwise, it will save the current tetromino the the main grid, clear rows and shows a new tetromino at the top of the grid.
+    /// </summary>
+    void Reset()
     {
-        TetronimoToGrid();
-        ClearRows();
-        position.X = (grid.Width / 2 - 1) * emptyCell.Width;
-        position.Y = -emptyCell.Height;
-        game.BlockDown();
-        speed = 1;
+        game.levelUp = false;
+        if (!AllowedPosition())
+        {
+            game.gameState = GameWorld.GameState.GameOver;
+            game.gameOver.Play();
+        }
+        else
+        {
+            TetrominoToGrid();
+            ClearRows();
+            game.BlockDown();
+        }
     }
 }
 /// <summary>
@@ -249,8 +329,10 @@ class IShaped : TetrisBlock
         color = Color.Aqua;
         FillArray(blocks);
     }
-
-    public void FillArray(bool[,] array)
+    /// <summary>
+    /// Fills in the tetromino in the array using true and false.
+    /// </summary>
+    void FillArray(bool[,] array)
     {
         for (int x = 0; x < 4; x++)
         {
@@ -274,7 +356,10 @@ class OShaped : TetrisBlock
         color = Color.Yellow;
         FillArray(blocks);
     }
-    public void FillArray(bool[,] array)
+    /// <summary>
+    /// Fills in the tetromino in the array using true and false.
+    /// </summary>
+    void FillArray(bool[,] array)
     {
         for (int x = 0; x < 4; x++)
         {
@@ -298,7 +383,10 @@ class TShaped : TetrisBlock
         color = Color.Purple;
         FillArray(blocks);
     }
-    public void FillArray(bool[,] array)
+    /// <summary>
+    /// Fills in the tetromino in the array using true and false.
+    /// </summary>
+    void FillArray(bool[,] array)
     {
         for (int x = 0; x < 4; x++)
         {
@@ -322,7 +410,10 @@ class SShaped : TetrisBlock
         color = Color.Green;
         FillArray(blocks);
     }
-    public void FillArray(bool[,] array)
+    /// <summary>
+    /// Fills in the tetromino in the array using true and false.
+    /// </summary>
+    void FillArray(bool[,] array)
     {
         for (int x = 0; x < 4; x++)
         {
@@ -346,7 +437,10 @@ class LShaped : TetrisBlock
         color = Color.Orange;
         FillArray(blocks);
     }
-    public void FillArray(bool[,] array)
+    /// <summary>
+    /// Fills in the tetromino in the array using true and false.
+    /// </summary>
+    void FillArray(bool[,] array)
     {
         for (int x = 0; x < 4; x++)
         {
@@ -370,7 +464,10 @@ class ZShaped : TetrisBlock
         color = Color.Red;
         FillArray(blocks);
     }
-    public void FillArray(bool[,] array)
+    /// <summary>
+    /// Fills in the tetromino in the array using true and false.
+    /// </summary>
+    void FillArray(bool[,] array)
     {
         for (int x = 0; x < 4; x++)
         {
@@ -394,7 +491,10 @@ class JShaped : TetrisBlock
         color = Color.DarkBlue;
         FillArray(blocks);
     }
-    public void FillArray(bool[,] array)
+    /// <summary>
+    /// Fills in the tetromino in the array using true and false.
+    /// </summary>
+    void FillArray(bool[,] array)
     {
         for (int x = 0; x < 4; x++)
         {

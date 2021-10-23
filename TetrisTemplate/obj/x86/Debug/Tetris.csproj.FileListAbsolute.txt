@@ -25,3 +25,15 @@ D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\obj\x86\Deb
 D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\obj\x86\Debug\Tetris.csproj.CopyComplete
 D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\obj\x86\Debug\Tetris.exe
 D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\obj\x86\Debug\Tetris.pdb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\success.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\line.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\selection.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\clear.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\fall.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\rotate.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\tetris-music.wma
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\tetris-music.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\maintheme.wma
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\maintheme.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\clear4.xnb
+D:\Uni\MSc\Pre-Master\Gameprogrammeren\Prac2 - Tetris\TetrisTemplate\bin\Windows\x86\Debug\Content\gameover.xnb

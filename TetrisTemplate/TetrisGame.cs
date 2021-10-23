@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Media;
 
 class TetrisGame : Game
 {
@@ -54,19 +55,24 @@ class TetrisGame : Game
         // create and reset the game world
         gameWorld = new GameWorld();
         gameWorld.Reset();
+
+        // Play the tetris song repeatetly
+        MediaPlayer.IsRepeating = true;
+        MediaPlayer.Volume = 0.3f;
+        MediaPlayer.Play(gameWorld.mainTheme);
     }
 
     protected override void Update(GameTime gameTime)
     {
         inputHelper.Update(gameTime);
         gameWorld.HandleInput(gameTime, inputHelper);
-        gameWorld.Update(gameTime, inputHelper);
+        gameWorld.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.White);
-        gameWorld.Draw(gameTime, spriteBatch);
+        gameWorld.Draw(spriteBatch);
     }
 }
 

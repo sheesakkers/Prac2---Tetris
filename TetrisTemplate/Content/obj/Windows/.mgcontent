@@ -6,5 +6,11 @@
   <SourceFiles>
     <File>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/SpelFont.spritefont</File>
     <File>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/block.png</File>
+    <File>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/rotate.wav</File>
+    <File>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/success.wav</File>
+    <File>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/maintheme.mp3</File>
+    <File>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/clear.wav</File>
+    <File>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/clear4.wav</File>
+    <File>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/gameover.wav</File>
   </SourceFiles>
 </SourceFileCollection>

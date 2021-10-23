@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SourceFile>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/fall.wav</SourceFile>
+  <SourceTime>2021-10-23T13:48:06+02:00</SourceTime>
+  <DestFile>D:/Uni/MSc/Pre-Master/Gameprogrammeren/Prac2 - Tetris/TetrisTemplate/Content/bin/Windows/fall.xnb</DestFile>
+  <DestTime>2021-10-23T14:37:30+02:00</DestTime>
+  <Importer>WavImporter</Importer>
+  <ImporterTime>2017-03-01T16:05:36+01:00</ImporterTime>
+  <Processor>SoundEffectProcessor</Processor>
+  <ProcessorTime>2017-03-01T16:05:36+01:00</ProcessorTime>
+  <Parameters>
+    <Key>Quality</Key>
+    <Value>Best</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>
