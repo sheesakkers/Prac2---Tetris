@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -18,6 +19,11 @@ class TetrisBlock
     public double waitTime;
 
     /// <summary>
+    /// Passed time between every time the Update method is used.
+    /// </summary>
+    public double velocity;
+
+    /// <summary>
     /// 4x4 array that describes the tretronimos using true and false.
     /// </summary>
     protected bool[,] blocks;
@@ -26,11 +32,6 @@ class TetrisBlock
     /// Specific colors linked to the 7 tetrominoes.
     /// </summary>
     protected Color color;
-
-    /// <summary>
-    /// Passed time between every time the Update method is used.
-    /// </summary>
-    double velocity;
 
     /// <summary>
     /// Main grid of the game.
@@ -57,10 +58,10 @@ class TetrisBlock
         game = gameWorld;
 
         position = new Point((grid.Width / 2 - 1) * emptyCell.Width, -emptyCell.Height);
-        waitTime = 0.3;
         blocks = new bool[4, 4];
         color = new Color();
-        velocity = 1;
+        waitTime = 1;
+        velocity = 0;
     }
 
     /// <summary>
@@ -169,8 +170,8 @@ class TetrisBlock
     /// <summary>
     /// Checks if there are any full rows using the IsRowFull-method. 
     /// The amount of full rows is saved in a variable.
-    /// Every full row will increase the score with 10 points.
-    /// The player can level-up by scoring 100 points per level and the blocks will start moving down faster.
+    /// Every full row will increase the score with 10 points plus a bonus of 10 per extra row.
+    /// The player can level-up by scoring more and more points per level and the blocks will start moving down faster.
     /// </summary>
     void ClearRows()
     {
@@ -193,12 +194,11 @@ class TetrisBlock
 
         if (counter > 0)
         {
-            game.score += 10 * counter;
-            if (game.score >= game.level * 100)
+            game.score += counter * 10 + (counter - 1) * 10;
+            if (game.score >= game.level * 100 + (game.level - 1) * 50)
             {
                 game.level += 1;
                 game.levelUp = true;
-                waitTime *= 3;
                 game.levelUpSound.Play();
             }
             else
@@ -216,7 +216,7 @@ class TetrisBlock
     /// </summary>
     void MovingDown()
     {
-        if (velocity <= waitTime)
+        if (velocity >= waitTime)
         {
             position.Y += emptyCell.Height;
             if (!AllowedPosition())
@@ -224,7 +224,7 @@ class TetrisBlock
                 position.Y -= emptyCell.Height;
                 Reset();
             }
-            velocity = 1;
+            velocity = 0;
         }
     }
 
@@ -234,6 +234,8 @@ class TetrisBlock
     /// If the D is pressed, the tetromino will rotate clockwise if possible.
     /// If the A is pressed, the tetromino will rotate counterclockwise if possible.
     /// If the space-bar is pressed, the tetromino will move down as far as possible and the position will be saved in the main grid.
+    /// If the C is pressed, the current tetromino will be swapped with the block that is currently held. This block can be used later when pressing C again.
+    /// If the down-key is pressed, the tetromino will move one block down.
     /// </summary>
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
     {
@@ -273,6 +275,19 @@ class TetrisBlock
             position.Y -= emptyCell.Height;
             Reset();
         }
+        else if (inputHelper.KeyPressed(Keys.C))
+        {
+            game.HoldBlock();
+        }
+        else if (inputHelper.KeyPressed(Keys.Down))
+        {
+            position.Y += emptyCell.Height;
+            if (!AllowedPosition())
+            {
+                position.Y -= emptyCell.Height;
+                Reset();
+            }
+        }
     }
 
     /// <summary>
@@ -280,7 +295,7 @@ class TetrisBlock
     /// </summary>
     public void Update(GameTime gameTime)
     {
-        velocity -= gameTime.ElapsedGameTime.TotalSeconds;
+        velocity += gameTime.ElapsedGameTime.TotalSeconds;
         MovingDown();
     }
 
